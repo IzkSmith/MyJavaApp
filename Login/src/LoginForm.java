@@ -24,7 +24,7 @@ public class LoginForm {
 	}
 
 	public LoginForm() {
-		//подключение в бд
+		//Database connection
 		try
         {
         	Class.forName("org.postgresql.Driver");
@@ -45,7 +45,7 @@ public class LoginForm {
         	e.printStackTrace();
         	return;
         }
-		//Инициализация всех полей
+		//Fields initialization
 		frame = new JFrame("Login Form");	 
 		usernameLabel = new JLabel("Username");
 		passwordLabel = new JLabel("Password");
@@ -60,7 +60,7 @@ public class LoginForm {
 		newUserButton = new JButton("Create new user");
 		newUserButton.addActionListener(new NewUserButtonListener());
 		
-		//размещение всех элементов на фрейме
+		//Placing elements on frame
 		usernameLabel.setBounds(80, 70, 200, 30);//(x,y,length,height)
 		passwordLabel.setBounds(80, 110, 200, 30);
 		usernameField.setBounds(170, 70, 200, 30);
@@ -69,7 +69,7 @@ public class LoginForm {
 		errorLabel.setBounds(170, 135, 230, 30);
 		newUserButton.setBounds(80,160,150,30);
 		
-		//добавление всех элементов на фрейм
+		//Adding elements on frame
 		frame.add(usernameLabel);
 		frame.add(usernameField);
 		frame.add(passwordLabel);
@@ -78,7 +78,7 @@ public class LoginForm {
 		frame.add(errorLabel);
 		frame.add(newUserButton);
 		
-		//расположение фрейма по центру экрана
+		//frame in the center of the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int sizeWidth = 500;
 		int sizeHeight = 300;
@@ -91,7 +91,7 @@ public class LoginForm {
 		frame.setVisible(true);	
 	}
 	
-	//внутренний класс обрабатывающий событие нажатия кнопки
+	//TO DO select query
 	public class LoginButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent ev) {
 			
