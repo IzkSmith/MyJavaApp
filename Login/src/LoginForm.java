@@ -1,8 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 import javax.swing.*;
  
@@ -69,7 +67,7 @@ public class LoginForm {
 		errorLabel.setBounds(170, 135, 230, 30);
 		newUserButton.setBounds(80,160,150,30);
 		
-		//Adding elements on frame
+		//Adding elements on the frame
 		frame.add(usernameLabel);
 		frame.add(usernameField);
 		frame.add(passwordLabel);

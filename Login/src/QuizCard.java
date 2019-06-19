@@ -14,5 +14,4 @@ public class QuizCard {
 	public String getAnswer() {
 		return answer;
 	}
-
 }
