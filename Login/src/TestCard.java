@@ -1,8 +1,8 @@
-public class QuizCard {
+public class TestCard {
 	private String question;
 	private String answer;
 
-	public QuizCard(String q, String a) {
+	public TestCard(String q, String a) {
 		question=q;
 		answer=a;
 	}

@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.*;
 
 import javax.swing.*;
@@ -11,54 +10,31 @@ public class LoginForm {
 	private JPasswordField passwordField;
 	private JFrame frame;
 	private JButton newUserButton;
-	private static Connection conn;
+	private static Connection connection;
 	
 	public static void main(String[] args) {
 		new LoginForm();
 	}
 	
 	public static Connection getConnection() {
-		return conn;
+		return connection;
 	}
 
 	public LoginForm() {
-		//Database connection
-		try
-        {
-        	Class.forName("org.postgresql.Driver");
-        }catch(ClassNotFoundException e)
-        {
-        	System.out.println("Driver not found");
-        	e.printStackTrace();
-        	return;
-        }
-        System.out.println("Driver Registered Successfully...");
-        conn = null;
-        try
-        {
-        	conn = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/MyApp","postgres","1029");
-        }catch (SQLException e)
-        {
-        	System.out.println("Unable to create the connection");
-        	e.printStackTrace();
-        	return;
-        }
-		//Fields initialization
-		frame = new JFrame("Login Form");	 
-		usernameLabel = new JLabel("Username");
-		passwordLabel = new JLabel("Password");
-		usernameField = new JTextField();
-		passwordField = new JPasswordField();
-		loginButton = new JButton("Login");
-		
-		loginButton.addActionListener(new LoginButtonListener());
-		errorLabel= new JLabel("");
+		DatabaseConnection();
+        
+		//Adding elements on the frame
+		(frame = new JFrame("Login Form")).add(usernameLabel = new JLabel("Username"));
+		frame.add(usernameField = new JTextField());
+		frame.add(passwordLabel = new JLabel("Password"));
+		frame.add(passwordField = new JPasswordField());
+		frame.add(errorLabel= new JLabel(""));
+		frame.add(loginButton = new JButton("Login"));
+		frame.add(newUserButton = new JButton("Create new user"));
+		errorLabel.setVisible(true);
 		errorLabel.setForeground(Color.red);
 		
-		newUserButton = new JButton("Create new user");
-		newUserButton.addActionListener(new NewUserButtonListener());
-		
-		//Placing elements on frame
+		//Placing elements on the frame
 		usernameLabel.setBounds(80, 70, 200, 30);//(x,y,length,height)
 		passwordLabel.setBounds(80, 110, 200, 30);
 		usernameField.setBounds(170, 70, 200, 30);
@@ -67,16 +43,7 @@ public class LoginForm {
 		errorLabel.setBounds(170, 135, 230, 30);
 		newUserButton.setBounds(80,160,150,30);
 		
-		//Adding elements on the frame
-		frame.add(usernameLabel);
-		frame.add(usernameField);
-		frame.add(passwordLabel);
-		frame.add(passwordField);
-		frame.add(loginButton);
-		frame.add(errorLabel);
-		frame.add(newUserButton);
-		
-		//frame in the center of the screen
+		//frame in a center of the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int sizeWidth = 500;
 		int sizeHeight = 300;
@@ -87,22 +54,19 @@ public class LoginForm {
 		frame.setSize(sizeWidth,sizeHeight);
 		frame.setLayout(null);
 		frame.setVisible(true);	
-	}
-	
-	//TO DO select query
-	public class LoginButtonListener implements ActionListener{
-		public void actionPerformed(ActionEvent ev) {
-			
+         		
+		//TO DO select queries
+		loginButton.addActionListener(e->
+		{	
 			String uname = usernameField.getText();
 			String pass = String.valueOf(passwordField.getPassword());
 			System.out.println(pass);
 			errorLabel.setVisible(true);
 			
-			if(uname.equals("s") && pass.equals("s")){
+			if(uname.equals("student") && pass.equals("student")){
 				new Student();
-				frame.setVisible(false);
 			}else {
-				if(uname.equals("t") && pass.equals("t")){
+				if(uname.equals("teacher") && pass.equals("teacher")){
 					new Teacher();
 					frame.setVisible(false);
 				}else {
@@ -111,13 +75,35 @@ public class LoginForm {
 				errorLabel.setText("username or password is incorrect");
 				}
 			}
-		}
-	}
-	
-	public class NewUserButtonListener implements ActionListener{
-		public void actionPerformed(ActionEvent ev) {
+		});
+		
+		newUserButton.addActionListener(e->
+		{
 			new RegistrationForm();
 			frame.setVisible(false);
-		}
+		});
+	}
+	
+	public void DatabaseConnection(){
+		try
+	    {
+	    	Class.forName("org.postgresql.Driver");
+	    }catch(ClassNotFoundException e)
+	    {
+	    	System.out.println("Driver not found");
+	    	e.printStackTrace();
+	    	return;
+	    }
+	    System.out.println("Driver Registered Successfully...");
+	    connection = null;
+	    try
+	    {
+	    	connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/MyApp","postgres","1029");
+	    }catch (SQLException e)
+	    {
+	    	System.out.println("Unable to create the connection");
+	    	e.printStackTrace();
+	    	return;
+	    }
 	}
 }

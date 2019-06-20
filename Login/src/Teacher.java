@@ -1,5 +1,4 @@
 import java.util.*;
-import java.awt.event.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -7,13 +6,12 @@ import java.net.Socket;
 
 public class Teacher {
 	private JTextArea incoming,question,answer;
-	private ArrayList<QuizCard> cardList;
+	private ArrayList<TestCard> cardList;
 	private JFrame frame;
 	private BufferedReader reader;
 	private PrintWriter writer;
 	private JTextField outgoing;
 	private Socket sock;
-	
 	
 	public Teacher() {
 		frame = new JFrame("Quiz Card Builder");
@@ -32,9 +30,19 @@ public class Teacher {
 		cScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		cScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		outgoing = new JTextField(20);
-		JButton sendButton =new JButton("send");
-		sendButton.addActionListener(new SendButtonListener());
 		
+		JButton sendButton =new JButton("send");
+		sendButton.addActionListener(ev-> {
+			try {
+				writer.println(outgoing.getText());
+				writer.flush();
+			}catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			outgoing.setText("");
+			outgoing.requestFocus();
+		});
+			
 		JScrollPane qScroller = new JScrollPane(question);
 		qScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		qScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -50,7 +58,7 @@ public class Teacher {
 		
 		JButton nextButton = new JButton("Next Card");
 		
-		cardList = new ArrayList<QuizCard>();
+		cardList = new ArrayList<TestCard>();
 		
 		JLabel qLabel= new JLabel("Question:");
 		JLabel aLabel=new JLabel("Answer:");
@@ -68,15 +76,31 @@ public class Teacher {
 		mainPanel.add(aScroller);
 		mainPanel.add(nextButton);
 
-		
-		nextButton.addActionListener(new NextCardListener());
+		nextButton.addActionListener(ev -> {
+			TestCard card = new TestCard(question.getText(),answer.getText());
+			cardList.add(card);
+			clearCard();
+		});
 		
 		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
 		JMenuItem newMenuItem = new JMenuItem("New");	
 		JMenuItem saveMenuItem = new JMenuItem("Save");
-		newMenuItem.addActionListener(new NewMenuListener());		
-		saveMenuItem.addActionListener(new SaveMenuListener());
+		
+		newMenuItem.addActionListener( ev-> {
+			cardList.clear();
+			clearCard();
+		});
+		
+		saveMenuItem.addActionListener(ev-> {
+			TestCard card = new TestCard(question.getText(),answer.getText());
+			cardList.add(card);
+			
+			JFileChooser fileSave = new JFileChooser();
+			fileSave.showSaveDialog(frame);
+			saveFile(fileSave.getSelectedFile());
+		});
+		
 		fileMenu.add(newMenuItem);
 		fileMenu.add(saveMenuItem);
 		menuBar.add(fileMenu);
@@ -84,9 +108,19 @@ public class Teacher {
 		
 		setUpNetworking();
 		
-		Thread readerThread=new Thread(new IncomingReader());
+		Thread readerThread=new Thread(()->{
+			String message;
+			try {
+				while((message=reader.readLine())!=null) {
+					System.out.println("read"+message);
+					incoming.append(message + "\n");
+				}
+			}catch(Exception ex){ex.printStackTrace();}
+		});
+		
 		readerThread.start();
 		
+		//frame in a center of the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int sizeWidth = 600;
 		int sizeHeight = 700;
@@ -99,7 +133,6 @@ public class Teacher {
 		frame.setVisible(true);
 	}
 	
-	
 	private void setUpNetworking() {
 		try {
 			sock=new Socket("127.0.0.1",5000);
@@ -110,43 +143,17 @@ public class Teacher {
 		}catch(IOException ex) {ex.printStackTrace();}	
 	}
 	
-	private class NextCardListener implements ActionListener{
-		public void actionPerformed(ActionEvent ev) {
-			QuizCard card = new QuizCard(question.getText(),answer.getText());
-			cardList.add(card);
-			clearCard();
-		}
-	}
-	
 	public void clearCard() {
 		question.setText("");
 		answer.setText("");
 		question.requestFocus();
 	}
 	
-	private class NewMenuListener implements ActionListener{
-		public void actionPerformed(ActionEvent ev) {
-			cardList.clear();
-			clearCard();
-		}
-	}
-	
-	private class SaveMenuListener implements ActionListener{
-		public void actionPerformed(ActionEvent ev) {
-			QuizCard card = new QuizCard(question.getText(),answer.getText());
-			cardList.add(card);
-			
-			JFileChooser fileSave = new JFileChooser();
-			fileSave.showSaveDialog(frame);
-			saveFile(fileSave.getSelectedFile());
-		}
-	}
-	
 	private void saveFile(File file) {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			//буфер позволяет загрузить все в файл единовременно после его закрытия
-			for(QuizCard card:cardList) {
+			for(TestCard card:cardList) {
 				writer.write(card.getQuestion()+"/");
 				writer.write(card.getAnswer()+"\n");
 				//writer.flush()досрочно загрузить все из буфера в файл
@@ -155,31 +162,6 @@ public class Teacher {
 		}catch(IOException ex){
 			System.out.println("couldn't write the cardList out");
 			ex.printStackTrace();
-		}
-	}
-	
-	public class IncomingReader implements Runnable{
-		public void run() {
-			String message;
-			try {
-				while((message=reader.readLine())!=null) {
-					System.out.println("read"+message);
-					incoming.append(message + "\n");
-				}
-			}catch(Exception ex){ex.printStackTrace();}
-		}
-	}
-	
-	public class SendButtonListener implements ActionListener{
-		public void actionPerformed(ActionEvent ev) {
-			try {
-				writer.println(outgoing.getText());
-				writer.flush();
-			}catch(Exception ex) {
-				ex.printStackTrace();
-			}
-			outgoing.setText("");
-			outgoing.requestFocus();
 		}
 	}
 }
